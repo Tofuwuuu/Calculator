@@ -1,33 +1,34 @@
 (function () {
   const displayEl = document.getElementById("display");
+  const displayAnsEl = document.getElementById("display-ans");
   const keypad = document.querySelector(".keypad");
 
-  let displayValue = "0";
-  let storedValue = null;
-  let pendingOperator = null;
-  let waitingForOperand = false;
+  let firstOperand = "0";
+  let operator = null;
+  let secondOperand = "";
   let errorState = false;
+  let justEvaluated = false;
+  let lastAns = 0;
 
-  function updateDisplay() {
-    displayEl.textContent = displayValue;
+  function opSymbol(op) {
+    switch (op) {
+      case "add":
+        return "+";
+      case "subtract":
+        return "−";
+      case "multiply":
+        return "×";
+      case "divide":
+        return "÷";
+      default:
+        return "";
+    }
   }
 
-  function clear() {
-    displayValue = "0";
-    storedValue = null;
-    pendingOperator = null;
-    waitingForOperand = false;
-    errorState = false;
-    updateDisplay();
-  }
-
-  function setError() {
-    displayValue = "Error";
-    errorState = true;
-    storedValue = null;
-    pendingOperator = null;
-    waitingForOperand = true;
-    updateDisplay();
+  function parseOperand(s) {
+    if (s === "" || s === ".") return 0;
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
   }
 
   function formatResult(n) {
@@ -37,10 +38,37 @@
     return s;
   }
 
-  function getDisplayNumber() {
-    if (displayValue === "Error") return NaN;
-    const n = parseFloat(displayValue);
-    return Number.isFinite(n) ? n : 0;
+  function buildMainDisplay() {
+    if (errorState) return "Error";
+    if (operator === null) return firstOperand;
+    const sym = opSymbol(operator);
+    if (secondOperand === "") return `${firstOperand} ${sym}`;
+    return `${firstOperand} ${sym} ${secondOperand}`;
+  }
+
+  function updateDisplay() {
+    displayEl.textContent = buildMainDisplay();
+    displayAnsEl.textContent = `Ans = ${formatResult(lastAns)}`;
+  }
+
+  function clear() {
+    firstOperand = "0";
+    operator = null;
+    secondOperand = "";
+    errorState = false;
+    justEvaluated = false;
+    lastAns = 0;
+    updateDisplay();
+  }
+
+  function setError() {
+    errorState = true;
+    firstOperand = "0";
+    operator = null;
+    secondOperand = "";
+    justEvaluated = false;
+    displayEl.textContent = "Error";
+    displayAnsEl.textContent = `Ans = ${formatResult(lastAns)}`;
   }
 
   function applyOp(a, b, op) {
@@ -58,71 +86,120 @@
     }
   }
 
+  function appendDigit(target, d) {
+    if (target === "first") {
+      if (justEvaluated) {
+        firstOperand = d;
+        justEvaluated = false;
+        return;
+      }
+      if (firstOperand === "0" && d !== "0") {
+        firstOperand = d;
+      } else if (firstOperand === "0" && d === "0") {
+        return;
+      } else {
+        firstOperand += d;
+      }
+    } else {
+      if (secondOperand === "0" && d !== "0") {
+        secondOperand = d;
+      } else if (secondOperand === "0" && d === "0") {
+        return;
+      } else if (secondOperand === "") {
+        secondOperand = d;
+      } else {
+        secondOperand += d;
+      }
+    }
+  }
+
   function inputDigit(d) {
     if (errorState) {
       clear();
     }
-    if (waitingForOperand) {
-      displayValue = d;
-      waitingForOperand = false;
+    if (operator === null) {
+      appendDigit("first", d);
     } else {
-      if (displayValue === "0" && d !== "0") {
-        displayValue = d;
-      } else if (displayValue === "0" && d === "0") {
-        return;
-      } else if (displayValue === "-0") {
-        displayValue = "-" + d;
-      } else {
-        displayValue += d;
-      }
+      appendDigit("second", d);
     }
     updateDisplay();
+  }
+
+  function appendDecimal(target) {
+    if (target === "first") {
+      if (justEvaluated) {
+        firstOperand = "0.";
+        justEvaluated = false;
+        return;
+      }
+      if (!firstOperand.includes(".")) {
+        firstOperand += ".";
+      }
+    } else {
+      if (secondOperand === "") {
+        secondOperand = "0.";
+      } else if (!secondOperand.includes(".")) {
+        secondOperand += ".";
+      }
+    }
   }
 
   function inputDecimal() {
     if (errorState) {
       clear();
     }
-    if (waitingForOperand) {
-      displayValue = "0.";
-      waitingForOperand = false;
-    } else if (!displayValue.includes(".")) {
-      displayValue += ".";
+    if (operator === null) {
+      appendDecimal("first");
+    } else {
+      appendDecimal("second");
     }
     updateDisplay();
   }
 
   function inputOperator(op) {
     if (errorState) return;
-    if (pendingOperator !== null && !waitingForOperand) {
-      const result = applyOp(storedValue, getDisplayNumber(), pendingOperator);
+    if (justEvaluated) {
+      justEvaluated = false;
+    }
+    if (operator !== null && secondOperand !== "") {
+      const result = applyOp(
+        parseOperand(firstOperand),
+        parseOperand(secondOperand),
+        operator
+      );
       if (result === null) {
         setError();
         return;
       }
-      displayValue = formatResult(result);
-      storedValue = result;
+      firstOperand = formatResult(result);
+      secondOperand = "";
+    } else if (operator !== null && secondOperand === "") {
+      /* replace operator only */
     } else {
-      storedValue = getDisplayNumber();
+      /* first operator after a number */
     }
-    pendingOperator = op;
-    waitingForOperand = true;
+    operator = op;
     updateDisplay();
   }
 
   function equals() {
     if (errorState) return;
-    if (pendingOperator === null) return;
-    const right = waitingForOperand ? storedValue : getDisplayNumber();
-    const result = applyOp(storedValue, right, pendingOperator);
+    if (operator === null) return;
+    const rightStr = secondOperand === "" ? firstOperand : secondOperand;
+    const result = applyOp(
+      parseOperand(firstOperand),
+      parseOperand(rightStr),
+      operator
+    );
     if (result === null) {
       setError();
       return;
     }
-    displayValue = formatResult(result);
-    storedValue = null;
-    pendingOperator = null;
-    waitingForOperand = true;
+    lastAns = result;
+    firstOperand = formatResult(result);
+    operator = null;
+    secondOperand = "";
+    justEvaluated = true;
     updateDisplay();
   }
 
@@ -131,11 +208,25 @@
       clear();
       return;
     }
-    if (waitingForOperand) return;
-    if (displayValue.length <= 1) {
-      displayValue = "0";
+    if (justEvaluated) {
+      if (firstOperand.length <= 1) {
+        firstOperand = "0";
+      } else {
+        firstOperand = firstOperand.slice(0, -1);
+      }
+      updateDisplay();
+      return;
+    }
+    if (operator !== null && secondOperand !== "") {
+      secondOperand = secondOperand.slice(0, -1);
+    } else if (operator !== null && secondOperand === "") {
+      operator = null;
     } else {
-      displayValue = displayValue.slice(0, -1);
+      if (firstOperand.length <= 1) {
+        firstOperand = "0";
+      } else {
+        firstOperand = firstOperand.slice(0, -1);
+      }
     }
     updateDisplay();
   }

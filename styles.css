@@ -40,21 +40,38 @@ body {
   box-shadow: var(--shadow);
 }
 
+.display-stack {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem 0.75rem;
+  border-radius: 8px;
+  background: var(--bg-display);
+}
+
+.display-ans {
+  min-height: 1.25rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #8b93a5;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+
 .display {
   display: block;
   width: 100%;
-  margin-bottom: 0.75rem;
-  padding: 0.75rem 1rem;
-  min-height: 3.25rem;
+  margin: 0;
+  padding: 0;
+  min-height: 2.5rem;
   border: none;
-  border-radius: 8px;
-  background: var(--bg-display);
+  background: transparent;
   color: var(--text-display);
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   text-align: right;
   letter-spacing: 0.02em;
+  word-break: break-all;
 }
 
 .keypad {
