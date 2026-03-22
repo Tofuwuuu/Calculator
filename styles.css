@@ -1,0 +1,133 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-page: #e8eaef;
+  --bg-calc: #1c1f26;
+  --bg-display: #0f1115;
+  --text-display: #f2f4f8;
+  --key-bg: #2a2f3a;
+  --key-bg-hover: #363c4a;
+  --key-fn: #3d4454;
+  --key-fn-hover: #4a5163;
+  --key-op: #5c6bc0;
+  --key-op-hover: #6f78c9;
+  --key-equals: #7e57c2;
+  --key-equals-hover: #9575cd;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --radius: 12px;
+  --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-page);
+  font-family: var(--font);
+}
+
+.calculator {
+  width: min(100% - 2rem, 320px);
+  padding: 1rem;
+  background: var(--bg-calc);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.display {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  min-height: 3.25rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg-display);
+  color: var(--text-display);
+  font-size: 1.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.key {
+  margin: 0;
+  padding: 0.85rem 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--key-bg);
+  color: #f2f4f8;
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.key:hover {
+  background: var(--key-bg-hover);
+}
+
+.key:active {
+  transform: scale(0.97);
+}
+
+.key:focus {
+  outline: none;
+}
+
+.key:focus-visible {
+  outline: 2px solid #90caf9;
+  outline-offset: 2px;
+}
+
+.key-fn {
+  background: var(--key-fn);
+}
+
+.key-fn:hover {
+  background: var(--key-fn-hover);
+}
+
+.key-op {
+  background: var(--key-op);
+  color: #fff;
+}
+
+.key-op:hover {
+  background: var(--key-op-hover);
+}
+
+.key-equals {
+  background: var(--key-equals);
+  color: #fff;
+}
+
+.key-equals:hover {
+  background: var(--key-equals-hover);
+}
+
+.key-zero {
+  grid-column: span 2;
+}
+
+.keypad-spacer {
+  display: block;
+}
+
+.key:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
