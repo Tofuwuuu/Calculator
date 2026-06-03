@@ -15,11 +15,11 @@
       case "add":
         return "+";
       case "subtract":
-        return "−";
+        return "\u2212";
       case "multiply":
-        return "×";
+        return "\u00d7";
       case "divide":
-        return "÷";
+        return "\u00f7";
       default:
         return "";
     }
@@ -46,9 +46,25 @@
     return `${firstOperand} ${sym} ${secondOperand}`;
   }
 
+  function syncOperatorState() {
+    keypad.querySelectorAll("[data-operator]").forEach((btn) => {
+      btn.classList.toggle("is-selected", btn.dataset.operator === operator);
+    });
+  }
+
   function updateDisplay() {
     displayEl.textContent = buildMainDisplay();
     displayAnsEl.textContent = `Ans = ${formatResult(lastAns)}`;
+    syncOperatorState();
+  }
+
+  function flashButton(btn) {
+    if (!btn) return;
+    btn.classList.remove("is-pressed");
+    window.requestAnimationFrame(() => {
+      btn.classList.add("is-pressed");
+      window.setTimeout(() => btn.classList.remove("is-pressed"), 130);
+    });
   }
 
   function clear() {
@@ -69,6 +85,7 @@
     justEvaluated = false;
     displayEl.textContent = "Error";
     displayAnsEl.textContent = `Ans = ${formatResult(lastAns)}`;
+    syncOperatorState();
   }
 
   function applyOp(a, b, op) {
@@ -173,10 +190,6 @@
       }
       firstOperand = formatResult(result);
       secondOperand = "";
-    } else if (operator !== null && secondOperand === "") {
-      /* replace operator only */
-    } else {
-      /* first operator after a number */
     }
     operator = op;
     updateDisplay();
@@ -221,12 +234,10 @@
       secondOperand = secondOperand.slice(0, -1);
     } else if (operator !== null && secondOperand === "") {
       operator = null;
+    } else if (firstOperand.length <= 1) {
+      firstOperand = "0";
     } else {
-      if (firstOperand.length <= 1) {
-        firstOperand = "0";
-      } else {
-        firstOperand = firstOperand.slice(0, -1);
-      }
+      firstOperand = firstOperand.slice(0, -1);
     }
     updateDisplay();
   }
@@ -234,6 +245,8 @@
   keypad.addEventListener("click", function (e) {
     const btn = e.target.closest("button.key");
     if (!btn) return;
+
+    flashButton(btn);
 
     const digit = btn.getAttribute("data-digit");
     if (digit !== null) {
@@ -257,52 +270,58 @@
   document.addEventListener("keydown", function (e) {
     if (e.key >= "0" && e.key <= "9") {
       e.preventDefault();
+      flashButton(keypad.querySelector(`[data-digit="${e.key}"]`));
       inputDigit(e.key);
       return;
     }
     if (e.key === ".") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-action="decimal"]'));
       inputDecimal();
       return;
     }
     if (e.key === "+") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-operator="add"]'));
       inputOperator("add");
       return;
     }
-    if (e.key === "=") {
+    if (e.key === "=" || e.key === "Enter") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-action="equals"]'));
       equals();
       return;
     }
     if (e.key === "-") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-operator="subtract"]'));
       inputOperator("subtract");
       return;
     }
     if (e.key === "*") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-operator="multiply"]'));
       inputOperator("multiply");
       return;
     }
     if (e.key === "/") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-operator="divide"]'));
       inputOperator("divide");
-      return;
-    }
-    if (e.key === "Enter") {
-      e.preventDefault();
-      equals();
       return;
     }
     if (e.key === "Escape") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-action="clear"]'));
       clear();
       return;
     }
     if (e.key === "Backspace") {
       e.preventDefault();
+      flashButton(keypad.querySelector('[data-action="backspace"]'));
       backspace();
     }
   });
+
+  updateDisplay();
 })();

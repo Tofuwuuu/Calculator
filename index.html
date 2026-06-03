@@ -7,21 +7,36 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <svg class="wave-background" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+      <path class="wave wave-soft" d="M0 116C172 52 306 156 478 94C664 27 792 163 969 89C1152 13 1308 70 1440 33V0H0Z" />
+      <path class="wave wave-blue" d="M0 620C150 530 290 690 452 602C642 499 765 626 943 554C1127 480 1270 566 1440 505V900H0Z" />
+      <path class="wave wave-yellow" d="M0 705C176 596 304 742 486 656C668 570 815 709 1008 618C1173 540 1305 653 1440 594V900H0Z" />
+    </svg>
+
     <main class="calculator" aria-label="Calculator">
+      <div class="calculator-top">
+        <div>
+          <p class="eyebrow">Simple</p>
+          <h1>Calculator</h1>
+        </div>
+        <div class="status-dot" aria-hidden="true"></div>
+      </div>
+
       <div class="display-stack">
         <div class="display-ans" id="display-ans">Ans = 0</div>
         <output class="display display-main" id="display" aria-live="polite" aria-atomic="true">0</output>
       </div>
+
       <div class="keypad" role="group" aria-label="Keypad">
         <button type="button" class="key key-fn" data-action="clear">C</button>
-        <button type="button" class="key key-fn" data-action="backspace" aria-label="Backspace">⌫</button>
-        <button type="button" class="key key-op" data-operator="divide" aria-label="Divide">÷</button>
-        <button type="button" class="key key-op" data-operator="multiply" aria-label="Multiply">×</button>
+        <button type="button" class="key key-fn" data-action="backspace" aria-label="Backspace">&#9003;</button>
+        <button type="button" class="key key-op" data-operator="divide" aria-label="Divide">&divide;</button>
+        <button type="button" class="key key-op" data-operator="multiply" aria-label="Multiply">&times;</button>
 
         <button type="button" class="key" data-digit="7">7</button>
         <button type="button" class="key" data-digit="8">8</button>
         <button type="button" class="key" data-digit="9">9</button>
-        <button type="button" class="key key-op" data-operator="subtract" aria-label="Subtract">−</button>
+        <button type="button" class="key key-op" data-operator="subtract" aria-label="Subtract">&minus;</button>
 
         <button type="button" class="key" data-digit="4">4</button>
         <button type="button" class="key" data-digit="5">5</button>
@@ -38,6 +53,7 @@
         <span class="keypad-spacer" aria-hidden="true"></span>
       </div>
     </main>
+
     <script src="script.js" defer></script>
   </body>
 </html>
